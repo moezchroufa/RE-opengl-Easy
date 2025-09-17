@@ -7,6 +7,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "stb_img.h"
+
 /*func decl */
 GLFWwindow *CreateWindow(int w, int h, const char *wname);
 GLFWwindow *CreateWindowContext(int w, int h, const char *wname);
@@ -14,7 +16,15 @@ void FreeWindow(GLFWwindow *window);
 GLuint CreateShader(const char *vertexSource, const char *fragmentSource);
 char *ReadFile(const char *path);
 GLuint CreateShaderFiles(const char *vertexPath, const char *fragmentPath);
-
+GLuint ReloadShader(GLuint *shader, const char *vertexPath, const char *fragPath);
+GLuint CreateVertexArrayObject();
+GLuint CreateVertexBufferObject(const void *data, size_t sz);
+void SetUniform1i(GLuint program, const char *name, int value);
+void SetUniform1f(GLuint program, const char *name, float value);
+void SetUniform3f(GLuint program, const char *name, float x, float y, float z);
+void SetUniform4f(GLuint program, const char *name, float x, float y, float z, float w);
+void SetUniformMat4(GLuint program, const char *name, const float *matrix);
+GLuint LoadTexture(const char *path);
 /*func impl*/
 
 GLFWwindow *CreateWindow(int w, int h, const char *wname)
@@ -144,6 +154,114 @@ GLuint CreateShaderFiles(const char *vertexPath, const char *fragmentPath)
     free(fragmentSource);
 
     return program;
+}
+
+GLuint ReloadShader(GLuint *shader, const char *vertexPath, const char *fragPath)
+{
+    GLuint sh = CreateShaderFiles(vertexPath, fragPath);
+
+    if (sh)
+    {
+        glDeleteProgram(*shader);
+        *shader = sh;
+    }
+
+    return *shader;
+}
+
+GLuint CreateVertexArrayObject()
+{
+    GLuint vao;
+    glGenVertexArrays(1, &vao);
+    glBindVertexArray(vao);
+    return vao;
+}
+
+GLuint CreateVertexBufferObject(const void *data, size_t sz)
+{
+    GLuint vbo;
+    glGenBuffers(1, &vbo);
+    glBindBuffer(GL_ARRAY_BUFFER, vbo);
+    glBufferData(GL_ARRAY_BUFFER, sz, data, GL_STATIC_DRAW);
+
+    return vbo;
+}
+
+void SetUniform1i(GLuint program, const char *name, int value)
+{
+    GLint loc = glGetUniformLocation(program, name);
+    if (loc != -1)
+        glUniform1i(loc, value);
+    else
+        fprintf(stderr, "Uniform %s not found.\n", name);
+}
+
+void SetUniform1f(GLuint program, const char *name, float value)
+{
+    GLint loc = glGetUniformLocation(program, name);
+    if (loc != -1)
+        glUniform1f(loc, value);
+    else
+        fprintf(stderr, "Uniform %s not found.\n", name);
+}
+
+void SetUniform3f(GLuint program, const char *name, float x, float y, float z)
+{
+    GLint loc = glGetUniformLocation(program, name);
+    if (loc != -1)
+        glUniform3f(loc, x, y, z);
+    else
+        fprintf(stderr, "Uniform %s not found.\n", name);
+}
+
+void SetUniform4f(GLuint program, const char *name, float x, float y, float z, float w)
+{
+    GLint loc = glGetUniformLocation(program, name);
+    if (loc != -1)
+        glUniform4f(loc, x, y, z, w);
+    else
+        fprintf(stderr, "Uniform %s not found.\n", name);
+}
+
+void SetUniformMat4(GLuint program, const char *name, const float *matrix)
+{
+    GLint loc = glGetUniformLocation(program, name);
+    if (loc != -1)
+        glUniformMatrix4fv(loc, 1, GL_FALSE, matrix);
+    else
+        fprintf(stderr, "Uniform %s not found.\n", name);
+}
+
+GLuint LoadTexture(const char *path)
+{
+    int w;
+    int h;
+    int pipes; // R,G,B or R,G,B,ALPHA
+
+    unsigned char *data = stbi_load(path, &w, &h, &pipes, 0);
+    if (!data)
+    {
+        fprintf(stderr, "Failed to load texture : %s \n", path);
+        return 0;
+    }
+    GLenum format;
+    if (pipes == 4)
+    {
+        format = GL_RGBA;
+    }
+    else
+    {
+        format = GL_RGB;
+    }
+
+    GLuint texture;
+    glGenTextures(1, &texture);
+    glBindTexture(GL_TEXTURE_2D, texture);
+    glTexImage2D(GL_TEXTURE_2D, 0, format, w, h, 0, format, GL_UNSIGNED_BYTE, data);
+    glGenerateMipmap(GL_TEXTURE_2D);
+
+    stbi_image_free(data);
+    return texture;
 }
 
 #endif
