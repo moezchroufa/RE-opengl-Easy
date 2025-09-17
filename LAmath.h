@@ -6,7 +6,7 @@
 #define MATH_LINEAR_ALG_DECL
 
 #include <stdlib.h>
-#include <cmath>
+#include <math.h>
 
 typedef struct
 {
@@ -643,7 +643,7 @@ Mat4f mat4f_rotate_axis(Vec3f axis, float angle)
 
 Mat4f mat4f_perspective(float fov_radians, float aspect, float near, float far)
 {
-    Mat4f result = {0}; // Initialize all to zero
+    Mat4f result = {0};
 
     float f = 1.0f / tanf(fov_radians / 2.0f);
     result.m[0][0] = f / aspect;
