@@ -1,14 +1,21 @@
-
-
 #ifndef RE_OPENGL
 #define RE_OPENGL
-// includes
+/*list of includes*/
+
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include <stdio.h>
 #include <stdlib.h>
 
-// functions
+/*func decl */
+GLFWwindow *CreateWindow(int w, int h, const char *wname);
+GLFWwindow *CreateWindowContext(int w, int h, const char *wname);
+void FreeWindow(GLFWwindow *window);
+GLuint CreateShader(const char *vertexSource, const char *fragmentSource);
+char *ReadFile(const char *path);
+GLuint CreateShaderFiles(const char *vertexPath, const char *fragmentPath);
+
+/*func impl*/
 
 GLFWwindow *CreateWindow(int w, int h, const char *wname)
 {
@@ -55,7 +62,7 @@ void FreeWindow(GLFWwindow *window)
     glfwTerminate();
 }
 
-// params : needs GLSL source code
+/* you can your GLSL source as a string */
 GLuint CreateShader(const char *vertexSource, const char *fragmentSource)
 {
     // Compile vertex shader
@@ -113,8 +120,7 @@ char *ReadFile(const char *path)
     return buffer;
 }
 
-// read from files : CreateShader(f1,f2);
-
+/* read the GLSL source code via a file path*/
 GLuint CreateShaderFiles(const char *vertexPath, const char *fragmentPath)
 {
     char *vertexSource = ReadFile(vertexPath);
