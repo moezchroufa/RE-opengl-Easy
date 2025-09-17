@@ -3,9 +3,10 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#define WD 800
-#define HE 600
-char *window_name = "PEPE";
+#define WIDTH 800
+#define HEIGHT 600
+const char *window_name = "PEPE";
+
 int main()
 {
 

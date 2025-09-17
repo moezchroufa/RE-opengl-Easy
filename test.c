@@ -18,11 +18,8 @@ const char *fragmentShaderSource = "#version 330 core\n"
 
 int main()
 {
-    if (!glfwInit())
-    {
-        fprintf(stderr, "Failed to initialize GLFW\n");
-        return -1;
-    }
+
+    InitGLFW();
 
     GLFWwindow *window = CreateWindowContext(800, 600, "Triangle");
     if (!window)
