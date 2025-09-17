@@ -12,6 +12,7 @@
 /*func decl */
 GLFWwindow *CreateWindow(int w, int h, const char *wname);
 GLFWwindow *CreateWindowContext(int w, int h, const char *wname);
+void InitGLFW();
 void FreeWindow(GLFWwindow *window);
 GLuint CreateShader(const char *vertexSource, const char *fragmentSource);
 char *ReadFile(const char *path);
@@ -60,6 +61,16 @@ GLFWwindow *CreateWindowContext(int w, int h, const char *wname)
         return NULL;
     }
     return window;
+}
+
+void InitGLFW()
+{
+    if (!glfwInit())
+    {
+
+        fprintf(stderr, "GLFW init failed..\n");
+        exit(1);
+    }
 }
 
 void FreeWindow(GLFWwindow *window)
@@ -257,6 +268,10 @@ GLuint LoadTexture(const char *path)
     GLuint texture;
     glGenTextures(1, &texture);
     glBindTexture(GL_TEXTURE_2D, texture);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexImage2D(GL_TEXTURE_2D, 0, format, w, h, 0, format, GL_UNSIGNED_BYTE, data);
     glGenerateMipmap(GL_TEXTURE_2D);
 
