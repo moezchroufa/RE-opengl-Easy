@@ -10,5 +10,10 @@ $Flags : -lglew32 -lglfw3 -lopengl32 -lgdi32
 example using GCC : 
 gcc -o test test.c -lglew32 -lglfw3 -lopengl32 -lgdi32 
 
+
+NOTE : as you notice the code is influenced with C89 style
+you will see me doing things like that sometimes DrawingS = {.x= , .y= } , or Vec3f ={ x ,y} , Vec3(x,y)
+it's like a free style c11 c99 c89 .. 
+  
 -> feel free to use this or don't !
 Author : moezchroufa (gWall)
