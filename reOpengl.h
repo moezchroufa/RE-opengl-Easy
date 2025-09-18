@@ -26,6 +26,8 @@ void SetUniform3f(GLuint program, const char *name, float x, float y, float z);
 void SetUniform4f(GLuint program, const char *name, float x, float y, float z, float w);
 void SetUniformMat4(GLuint program, const char *name, const float *matrix);
 GLuint LoadTexture(const char *path);
+bool IsShaderCompiled(GLuint shader, const char *sharderName);
+bool IsProgramLinked(GLuint program);
 /*func impl*/
 
 GLFWwindow *CreateWindow(int w, int h, const char *wname)
@@ -91,16 +93,39 @@ GLuint CreateShader(const char *vertexSource, const char *fragmentSource)
     glShaderSource(vertexShader, 1, &vertexSource, NULL);
     glCompileShader(vertexShader);
 
+    if (!IsShaderCompiled(vertexShader, "vertex shader"))
+    {
+        glDeleteShader(vertexShader);
+
+        return 0;
+    }
+
     // Compile fragment shader
     GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
     glShaderSource(fragmentShader, 1, &fragmentSource, NULL);
     glCompileShader(fragmentShader);
+
+    if (!IsShaderCompiled(fragmentShader, "fragment shader"))
+    {
+        glDeleteShader(vertexShader);
+        glDeleteShader(fragmentShader);
+
+        return 0;
+    }
 
     // Link shaders into program
     GLuint shaderProgram = glCreateProgram();
     glAttachShader(shaderProgram, vertexShader);
     glAttachShader(shaderProgram, fragmentShader);
     glLinkProgram(shaderProgram);
+
+    if (!IsProgramLinked(shaderProgram))
+    {
+        glDeleteShader(vertexShader);
+        glDeleteShader(fragmentShader);
+        glDeleteProgram(shaderProgram);
+        return 0;
+    }
 
     // free shaders after linking
     glDeleteShader(vertexShader);
@@ -159,8 +184,50 @@ GLuint CreateShaderFiles(const char *vertexPath, const char *fragmentPath)
         return 0;
     }
 
-    GLuint program = CreateShader(vertexSource, fragmentSource);
+    // Compile vertex shader
+    GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
+    glShaderSource(vertexShader, 1, (const GLchar **)&vertexSource, NULL);
+    glCompileShader(vertexShader);
 
+    if (!IsShaderCompiled(vertexShader, "vertex shader"))
+    {
+        glDeleteShader(vertexShader);
+        free(vertexSource);
+        free(fragmentSource);
+        return 0;
+    }
+
+    // Compile fragment shader
+    GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
+    glShaderSource(fragmentShader, 1, (const GLchar **)&fragmentSource, NULL);
+    glCompileShader(fragmentShader);
+
+    if (!IsShaderCompiled(fragmentShader, "fragment shader"))
+    {
+        glDeleteShader(vertexShader);
+        glDeleteShader(fragmentShader);
+        free(vertexSource);
+        free(fragmentSource);
+        return 0;
+    }
+
+    GLuint program = glCreateProgram();
+    glAttachShader(program, vertexShader);
+    glAttachShader(program, fragmentShader);
+    glLinkProgram(program);
+
+    if (!IsProgramLinked(program))
+    {
+        glDeleteShader(vertexShader);
+        glDeleteShader(fragmentShader);
+        glDeleteProgram(program);
+        free(vertexSource);
+        free(fragmentSource);
+        return 0;
+    }
+
+    glDeleteShader(vertexShader);
+    glDeleteShader(fragmentShader);
     free(vertexSource);
     free(fragmentSource);
 
@@ -277,6 +344,39 @@ GLuint LoadTexture(const char *path)
 
     stbi_image_free(data);
     return texture;
+}
+
+bool IsShaderCompiled(GLuint shader, const char *shaderName)
+{
+
+    GLint success;
+    glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
+    if (!success)
+    {
+
+        char log[1024];
+        glGetShaderInfoLog(shader, sizeof(log), NULL, log);
+        fprintf(stderr, "[%s] compilation failed with [%s] \n", shaderName, log);
+        return false;
+    }
+
+    return true;
+}
+
+bool IsProgramLinked(GLuint program)
+{
+
+    GLint success;
+    glGetProgramiv(program, GL_LINK_STATUS, &success);
+    if (!sucess)
+    {
+        char log[1024];
+        glGetProgramInfoLog(program, sizeof(log), NULL, log);
+        fprintf(stderr, "Linking failed with [%s] \n", log);
+        return false;
+    }
+
+    return true;
 }
 
 #endif
