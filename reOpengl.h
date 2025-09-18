@@ -6,7 +6,7 @@
 #include <GLFW/glfw3.h>
 #include <stdio.h>
 #include <stdlib.h>
-
+#include <stdbool.h>
 #include "stb_img.h"
 
 /*func decl */
@@ -28,6 +28,8 @@ void SetUniformMat4(GLuint program, const char *name, const float *matrix);
 GLuint LoadTexture(const char *path);
 bool IsShaderCompiled(GLuint shader, const char *sharderName);
 bool IsProgramLinked(GLuint program);
+void SetupVertexAttrib(GLuint index, GLint size, GLenum type, GLsizei stride, const void *pointer);
+
 /*func impl*/
 
 GLFWwindow *CreateWindow(int w, int h, const char *wname)
@@ -183,55 +185,11 @@ GLuint CreateShaderFiles(const char *vertexPath, const char *fragmentPath)
         free(vertexSource);
         return 0;
     }
-
-    // Compile vertex shader
-    GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
-    glShaderSource(vertexShader, 1, (const GLchar **)&vertexSource, NULL);
-    glCompileShader(vertexShader);
-
-    if (!IsShaderCompiled(vertexShader, "vertex shader"))
-    {
-        glDeleteShader(vertexShader);
-        free(vertexSource);
-        free(fragmentSource);
-        return 0;
-    }
-
-    // Compile fragment shader
-    GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(fragmentShader, 1, (const GLchar **)&fragmentSource, NULL);
-    glCompileShader(fragmentShader);
-
-    if (!IsShaderCompiled(fragmentShader, "fragment shader"))
-    {
-        glDeleteShader(vertexShader);
-        glDeleteShader(fragmentShader);
-        free(vertexSource);
-        free(fragmentSource);
-        return 0;
-    }
-
-    GLuint program = glCreateProgram();
-    glAttachShader(program, vertexShader);
-    glAttachShader(program, fragmentShader);
-    glLinkProgram(program);
-
-    if (!IsProgramLinked(program))
-    {
-        glDeleteShader(vertexShader);
-        glDeleteShader(fragmentShader);
-        glDeleteProgram(program);
-        free(vertexSource);
-        free(fragmentSource);
-        return 0;
-    }
-
-    glDeleteShader(vertexShader);
-    glDeleteShader(fragmentShader);
+    GLuint shaderProgram = CreateShader(vertexSource, fragmentSource);
     free(vertexSource);
     free(fragmentSource);
 
-    return program;
+    return shaderProgram;
 }
 
 GLuint ReloadShader(GLuint *shader, const char *vertexPath, const char *fragPath)
@@ -310,7 +268,7 @@ void SetUniformMat4(GLuint program, const char *name, const float *matrix)
         fprintf(stderr, "Uniform %s not found.\n", name);
 }
 
-GLuint LoadTexture(const char *path)
+GLuint LoadTexture(const char *path, int setting)
 {
     int w;
     int h;
@@ -323,22 +281,42 @@ GLuint LoadTexture(const char *path)
         return 0;
     }
     GLenum format;
-    if (pipes == 4)
+    switch (pipes)
     {
-        format = GL_RGBA;
-    }
-    else
-    {
+    case 1:
+        format = GL_RED;
+        break;
+    case 3:
         format = GL_RGB;
+        break;
+    case 4:
+        format = GL_RGBA;
+        break;
+    default:
+        fprintf(stderr, "unsupported number of pipes : %d", pipes);
+        stbi_image_free(data);
+        return 0;
     }
 
     GLuint texture;
     glGenTextures(1, &texture);
     glBindTexture(GL_TEXTURE_2D, texture);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    // todo: change setting to enum type will be better and more precise
+    switch (setting)
+    {
+    case 1:
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        break;
+    default:
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    };
+
     glTexImage2D(GL_TEXTURE_2D, 0, format, w, h, 0, format, GL_UNSIGNED_BYTE, data);
     glGenerateMipmap(GL_TEXTURE_2D);
 
@@ -368,7 +346,7 @@ bool IsProgramLinked(GLuint program)
 
     GLint success;
     glGetProgramiv(program, GL_LINK_STATUS, &success);
-    if (!sucess)
+    if (!success)
     {
         char log[1024];
         glGetProgramInfoLog(program, sizeof(log), NULL, log);
@@ -377,6 +355,15 @@ bool IsProgramLinked(GLuint program)
     }
 
     return true;
+}
+/*  reason : i noticed that i call those multiple times so i decided to make
+    them as a function! hope they will be useful
+    i.e : SetupVertexAttrib(0,3,GL_FLOAT,3*sizeof(type),(void*)0);
+*/
+void SetupVertexAttrib(GLuint index, GLint size, GLenum type, GLsizei stride, const void *pointer)
+{
+    glVertexAttribPointer(index, size, type, GL_FALSE, stride, pointer);
+    glEnableVertexAttribArray(index);
 }
 
 #endif
