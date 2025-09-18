@@ -7,7 +7,7 @@
 
 #include <stdlib.h>
 #include <math.h>
-
+#define HOEMEAN static inline
 typedef struct
 {
     int x;
@@ -45,21 +45,21 @@ typedef struct
     float x, y, z, w;
 } Vec4f;
 
-Vec2i vec2i(int x, int y)
+HOEMEAN Vec2i vec2i(int x, int y)
 {
     Vec2i vec;
     vec.x = x;
     vec.y = y;
     return vec;
 }
-Vec2f vec2f(float x, float y)
+HOEMEAN Vec2f vec2f(float x, float y)
 {
     Vec2f vec;
     vec.x = x;
     vec.y = y;
     return vec;
 }
-Vec3i vec3i(int x, int y, int z)
+HOEMEAN Vec3i vec3i(int x, int y, int z)
 {
     Vec3i vec;
     vec.x = x;
@@ -67,7 +67,7 @@ Vec3i vec3i(int x, int y, int z)
     vec.z = z;
     return vec;
 }
-Vec3f vec3f(float x, float y, float z)
+HOEMEAN Vec3f vec3f(float x, float y, float z)
 {
     Vec3f vec;
     vec.x = x;
@@ -75,7 +75,7 @@ Vec3f vec3f(float x, float y, float z)
     vec.z = z;
     return vec;
 }
-Vec4i vec4i(int x, int y, int z, int w)
+HOEMEAN Vec4i vec4i(int x, int y, int z, int w)
 {
     Vec4i vec;
     vec.x = x;
@@ -84,7 +84,7 @@ Vec4i vec4i(int x, int y, int z, int w)
     vec.w = w;
     return vec;
 }
-Vec4f vec4f(float x, float y, float z, float w)
+HOEMEAN Vec4f vec4f(float x, float y, float z, float w)
 {
     Vec4f vec;
     vec.x = x;
@@ -94,7 +94,7 @@ Vec4f vec4f(float x, float y, float z, float w)
     return vec;
 }
 
-Vec2i vec2i_add(Vec2i a, Vec2i b)
+HOEMEAN Vec2i vec2i_add(Vec2i a, Vec2i b)
 {
     Vec2i result;
     result.x = a.x + b.x;
@@ -102,7 +102,7 @@ Vec2i vec2i_add(Vec2i a, Vec2i b)
     return result;
 }
 
-Vec2i vec2i_sub(Vec2i a, Vec2i b)
+HOEMEAN Vec2i vec2i_sub(Vec2i a, Vec2i b)
 {
     Vec2i result;
     result.x = a.x - b.x;
@@ -110,7 +110,7 @@ Vec2i vec2i_sub(Vec2i a, Vec2i b)
     return result;
 }
 
-Vec2i vec2i_mul_scalar(Vec2i v, int s)
+HOEMEAN Vec2i vec2i_mul_scalar(Vec2i v, int s)
 {
     Vec2i result;
     result.x = v.x * s;
@@ -118,17 +118,17 @@ Vec2i vec2i_mul_scalar(Vec2i v, int s)
     return result;
 }
 
-int vec2i_dot(Vec2i a, Vec2i b)
+HOEMEAN int vec2i_dot(Vec2i a, Vec2i b)
 {
     return a.x * b.x + a.y * b.y;
 }
 
-float vec2i_length(Vec2i v)
+HOEMEAN float vec2i_length(Vec2i v)
 {
     return sqrtf((float)(v.x * v.x + v.y * v.y));
 }
 
-Vec2f vec2f_add(Vec2f a, Vec2f b)
+HOEMEAN Vec2f vec2f_add(Vec2f a, Vec2f b)
 {
     Vec2f result;
     result.x = a.x + b.x;
@@ -136,7 +136,7 @@ Vec2f vec2f_add(Vec2f a, Vec2f b)
     return result;
 }
 
-Vec2f vec2f_sub(Vec2f a, Vec2f b)
+HOEMEAN Vec2f vec2f_sub(Vec2f a, Vec2f b)
 {
     Vec2f result;
     result.x = a.x - b.x;
@@ -144,7 +144,7 @@ Vec2f vec2f_sub(Vec2f a, Vec2f b)
     return result;
 }
 
-Vec2f vec2f_mul_scalar(Vec2f v, float s)
+HOEMEAN Vec2f vec2f_mul_scalar(Vec2f v, float s)
 {
     Vec2f result;
     result.x = v.x * s;
@@ -152,17 +152,17 @@ Vec2f vec2f_mul_scalar(Vec2f v, float s)
     return result;
 }
 
-float vec2f_dot(Vec2f a, Vec2f b)
+HOEMEAN float vec2f_dot(Vec2f a, Vec2f b)
 {
     return a.x * b.x + a.y * b.y;
 }
 
-float vec2f_length(Vec2f v)
+HOEMEAN float vec2f_length(Vec2f v)
 {
     return sqrtf(v.x * v.x + v.y * v.y);
 }
 
-Vec2f vec2f_normalize(Vec2f v)
+HOEMEAN Vec2f vec2f_normalize(Vec2f v)
 {
     float len = vec2f_length(v);
     Vec2f result;
@@ -179,7 +179,7 @@ Vec2f vec2f_normalize(Vec2f v)
     return result;
 }
 
-Vec3f vec3f_add(Vec3f a, Vec3f b)
+HOEMEAN Vec3f vec3f_add(Vec3f a, Vec3f b)
 {
     Vec3f result;
     result.x = a.x + b.x;
@@ -188,7 +188,7 @@ Vec3f vec3f_add(Vec3f a, Vec3f b)
     return result;
 }
 
-Vec3f vec3f_sub(Vec3f a, Vec3f b)
+HOEMEAN Vec3f vec3f_sub(Vec3f a, Vec3f b)
 {
     Vec3f result;
     result.x = a.x - b.x;
@@ -197,7 +197,7 @@ Vec3f vec3f_sub(Vec3f a, Vec3f b)
     return result;
 }
 
-Vec3f vec3f_mul_scalar(Vec3f v, float s)
+HOEMEAN Vec3f vec3f_mul_scalar(Vec3f v, float s)
 {
     Vec3f result;
     result.x = v.x * s;
@@ -206,17 +206,17 @@ Vec3f vec3f_mul_scalar(Vec3f v, float s)
     return result;
 }
 
-float vec3f_dot(Vec3f a, Vec3f b)
+HOEMEAN float vec3f_dot(Vec3f a, Vec3f b)
 {
     return a.x * b.x + a.y * b.y + a.z * b.z;
 }
 
-float vec3f_length(Vec3f v)
+HOEMEAN float vec3f_length(Vec3f v)
 {
     return sqrtf(v.x * v.x + v.y * v.y + v.z * v.z);
 }
 
-Vec3f vec3f_normalize(Vec3f v)
+HOEMEAN Vec3f vec3f_normalize(Vec3f v)
 {
     float len = vec3f_length(v);
     Vec3f result;
@@ -233,7 +233,7 @@ Vec3f vec3f_normalize(Vec3f v)
     return result;
 }
 
-Vec3f vec3f_cross(Vec3f a, Vec3f b)
+HOEMEAN Vec3f vec3f_cross(Vec3f a, Vec3f b)
 {
     Vec3f result;
     result.x = a.y * b.z - a.z * b.y;
@@ -242,7 +242,7 @@ Vec3f vec3f_cross(Vec3f a, Vec3f b)
     return result;
 }
 
-Vec4i vec4i_add(Vec4i a, Vec4i b)
+HOEMEAN Vec4i vec4i_add(Vec4i a, Vec4i b)
 {
     Vec4i result;
     result.x = a.x + b.x;
@@ -252,7 +252,7 @@ Vec4i vec4i_add(Vec4i a, Vec4i b)
     return result;
 }
 
-Vec4i vec4i_sub(Vec4i a, Vec4i b)
+HOEMEAN Vec4i vec4i_sub(Vec4i a, Vec4i b)
 {
     Vec4i result;
     result.x = a.x - b.x;
@@ -262,7 +262,7 @@ Vec4i vec4i_sub(Vec4i a, Vec4i b)
     return result;
 }
 
-Vec4i vec4i_mul_scalar(Vec4i v, int s)
+HOEMEAN Vec4i vec4i_mul_scalar(Vec4i v, int s)
 {
     Vec4i result;
     result.x = v.x * s;
@@ -272,17 +272,17 @@ Vec4i vec4i_mul_scalar(Vec4i v, int s)
     return result;
 }
 
-int vec4i_dot(Vec4i a, Vec4i b)
+HOEMEAN int vec4i_dot(Vec4i a, Vec4i b)
 {
     return a.x * b.x + a.y * b.y + a.z * b.z + a.w * b.w;
 }
 
-float vec4i_length(Vec4i v)
+HOEMEAN float vec4i_length(Vec4i v)
 {
     return sqrtf((float)(v.x * v.x + v.y * v.y + v.z * v.z + v.w * v.w));
 }
 
-Vec4f vec4f_add(Vec4f a, Vec4f b)
+HOEMEAN Vec4f vec4f_add(Vec4f a, Vec4f b)
 {
     Vec4f result;
     result.x = a.x + b.x;
@@ -292,7 +292,7 @@ Vec4f vec4f_add(Vec4f a, Vec4f b)
     return result;
 }
 
-Vec4f vec4f_sub(Vec4f a, Vec4f b)
+HOEMEAN Vec4f vec4f_sub(Vec4f a, Vec4f b)
 {
     Vec4f result;
     result.x = a.x - b.x;
@@ -302,7 +302,7 @@ Vec4f vec4f_sub(Vec4f a, Vec4f b)
     return result;
 }
 
-Vec4f vec4f_mul_scalar(Vec4f v, float s)
+HOEMEAN Vec4f vec4f_mul_scalar(Vec4f v, float s)
 {
     Vec4f result;
     result.x = v.x * s;
@@ -312,17 +312,17 @@ Vec4f vec4f_mul_scalar(Vec4f v, float s)
     return result;
 }
 
-float vec4f_dot(Vec4f a, Vec4f b)
+HOEMEAN float vec4f_dot(Vec4f a, Vec4f b)
 {
     return a.x * b.x + a.y * b.y + a.z * b.z + a.w * b.w;
 }
 
-float vec4f_length(Vec4f v)
+HOEMEAN float vec4f_length(Vec4f v)
 {
     return sqrtf(v.x * v.x + v.y * v.y + v.z * v.z + v.w * v.w);
 }
 
-Vec4f vec4f_normalize(Vec4f v)
+HOEMEAN Vec4f vec4f_normalize(Vec4f v)
 {
     float len = vec4f_length(v);
     Vec4f result;
@@ -357,7 +357,7 @@ typedef struct
     float m[4][4];
 } Mat4f;
 
-Mat2f mat2f(float m00, float m01, float m10, float m11)
+HOEMEAN Mat2f mat2f(float m00, float m01, float m10, float m11)
 {
     Mat2f result;
     result.m[0][0] = m00;
@@ -367,7 +367,7 @@ Mat2f mat2f(float m00, float m01, float m10, float m11)
     return result;
 }
 
-Mat3f mat3f(
+HOEMEAN Mat3f mat3f(
     float m00, float m01, float m02,
     float m10, float m11, float m12,
     float m20, float m21, float m22)
@@ -385,7 +385,7 @@ Mat3f mat3f(
     result.m[2][2] = m22;
     return result;
 }
-Mat4f mat4f(
+HOEMEAN Mat4f mat4f(
     float m00, float m01, float m02, float m03,
     float m10, float m11, float m12, float m13,
     float m20, float m21, float m22, float m23,
@@ -412,7 +412,7 @@ Mat4f mat4f(
     return result;
 }
 
-Mat2f mat2f_identity()
+HOEMEAN Mat2f mat2f_identity()
 {
     Mat2f result;
     result.m[0][0] = 1.0f;
@@ -422,7 +422,7 @@ Mat2f mat2f_identity()
     return result;
 }
 
-Mat2f mat2f_mul(Mat2f a, Mat2f b)
+HOEMEAN Mat2f mat2f_mul(Mat2f a, Mat2f b)
 {
     Mat2f result;
     int i, j, k;
@@ -440,7 +440,7 @@ Mat2f mat2f_mul(Mat2f a, Mat2f b)
     return result;
 }
 
-Vec2f mat2f_mul_vec2f(Mat2f m, Vec2f v)
+HOEMEAN Vec2f mat2f_mul_vec2f(Mat2f m, Vec2f v)
 {
     Vec2f result;
     result.x = m.m[0][0] * v.x + m.m[0][1] * v.y;
@@ -448,7 +448,7 @@ Vec2f mat2f_mul_vec2f(Mat2f m, Vec2f v)
     return result;
 }
 
-Mat2f mat2f_transpose(Mat2f m)
+HOEMEAN Mat2f mat2f_transpose(Mat2f m)
 {
     Mat2f result;
     result.m[0][0] = m.m[0][0];
@@ -458,7 +458,7 @@ Mat2f mat2f_transpose(Mat2f m)
     return result;
 }
 
-Mat3f mat3f_identity()
+HOEMEAN Mat3f mat3f_identity()
 {
     Mat3f result;
     int i, j;
@@ -468,7 +468,7 @@ Mat3f mat3f_identity()
     return result;
 }
 
-Mat3f mat3f_mul(Mat3f a, Mat3f b)
+HOEMEAN Mat3f mat3f_mul(Mat3f a, Mat3f b)
 {
     Mat3f result;
     int i, j, k;
@@ -486,7 +486,7 @@ Mat3f mat3f_mul(Mat3f a, Mat3f b)
     return result;
 }
 
-Vec3f mat3f_mul_vec3f(Mat3f m, Vec3f v)
+HOEMEAN Vec3f mat3f_mul_vec3f(Mat3f m, Vec3f v)
 {
     Vec3f result;
     result.x = m.m[0][0] * v.x + m.m[0][1] * v.y + m.m[0][2] * v.z;
@@ -495,7 +495,7 @@ Vec3f mat3f_mul_vec3f(Mat3f m, Vec3f v)
     return result;
 }
 
-Mat3f mat3f_transpose(Mat3f m)
+HOEMEAN Mat3f mat3f_transpose(Mat3f m)
 {
     Mat3f result;
     int i, j;
@@ -505,7 +505,7 @@ Mat3f mat3f_transpose(Mat3f m)
     return result;
 }
 
-Mat4f mat4f_identity()
+HOEMEAN Mat4f mat4f_identity()
 {
     Mat4f result;
     int i, j;
@@ -515,7 +515,7 @@ Mat4f mat4f_identity()
     return result;
 }
 
-Mat4f mat4f_mul(Mat4f a, Mat4f b)
+HOEMEAN Mat4f mat4f_mul(Mat4f a, Mat4f b)
 {
     Mat4f result;
     int i, j, k;
@@ -533,7 +533,7 @@ Mat4f mat4f_mul(Mat4f a, Mat4f b)
     return result;
 }
 
-Vec4f mat4f_mul_vec4f(Mat4f m, Vec4f v)
+HOEMEAN Vec4f mat4f_mul_vec4f(Mat4f m, Vec4f v)
 {
     Vec4f result;
     result.x = m.m[0][0] * v.x + m.m[0][1] * v.y + m.m[0][2] * v.z + m.m[0][3] * v.w;
@@ -543,7 +543,7 @@ Vec4f mat4f_mul_vec4f(Mat4f m, Vec4f v)
     return result;
 }
 
-Mat4f mat4f_transpose(Mat4f m)
+HOEMEAN Mat4f mat4f_transpose(Mat4f m)
 {
     Mat4f result;
     int i, j;
@@ -553,7 +553,7 @@ Mat4f mat4f_transpose(Mat4f m)
     return result;
 }
 
-Mat4f mat4f_translate(Vec3f t)
+HOEMEAN Mat4f mat4f_translate(Vec3f t)
 {
     Mat4f result = mat4f_identity();
     result.m[0][3] = t.x;
@@ -561,7 +561,8 @@ Mat4f mat4f_translate(Vec3f t)
     result.m[2][3] = t.z;
     return result;
 }
-Mat4f mat4f_scale(Vec3f s)
+
+HOEMEAN Mat4f mat4f_scale(Vec3f s)
 {
     Mat4f result = mat4f_identity();
     result.m[0][0] = s.x;
@@ -570,7 +571,7 @@ Mat4f mat4f_scale(Vec3f s)
     return result;
 }
 
-Mat4f mat4f_rotate_x(float angle)
+HOEMEAN Mat4f mat4f_rotate_x(float angle)
 {
     Mat4f result = mat4f_identity();
     float c = cosf(angle);
@@ -583,7 +584,7 @@ Mat4f mat4f_rotate_x(float angle)
     return result;
 }
 
-Mat4f mat4f_rotate_y(float angle)
+HOEMEAN Mat4f mat4f_rotate_y(float angle)
 {
     Mat4f result = mat4f_identity();
     float c = cosf(angle);
@@ -596,7 +597,7 @@ Mat4f mat4f_rotate_y(float angle)
     return result;
 }
 
-Mat4f mat4f_rotate_z(float angle)
+HOEMEAN Mat4f mat4f_rotate_z(float angle)
 {
     Mat4f result = mat4f_identity();
     float c = cosf(angle);
@@ -609,7 +610,7 @@ Mat4f mat4f_rotate_z(float angle)
     return result;
 }
 
-Mat4f mat4f_rotate_axis(Vec3f axis, float angle)
+HOEMEAN Mat4f mat4f_rotate_axis(Vec3f axis, float angle)
 {
     axis = vec3f_normalize(axis);
     float x = axis.x, y = axis.y, z = axis.z;
@@ -641,7 +642,7 @@ Mat4f mat4f_rotate_axis(Vec3f axis, float angle)
     return result;
 }
 
-Mat4f mat4f_perspective(float fov_radians, float aspect, float near, float far)
+HOEMEAN Mat4f mat4f_perspective(float fov_radians, float aspect, float near, float far)
 {
     Mat4f result = {0};
 
@@ -654,7 +655,7 @@ Mat4f mat4f_perspective(float fov_radians, float aspect, float near, float far)
 
     return result;
 }
-Mat4f mat4f_ortho(float left, float right, float bottom, float top, float near, float far)
+HOEMEAN Mat4f mat4f_ortho(float left, float right, float bottom, float top, float near, float far)
 {
     Mat4f result = mat4f_identity();
 
