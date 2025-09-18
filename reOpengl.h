@@ -8,6 +8,28 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include "stb_img.h"
+#include "LAmath.h"
+/* type decl */
+
+typedef enum
+{
+    TEXTURE_CLAMP = 0,
+    TEXTURE_REPEAT = 1
+} TextureSetting;
+typedef struct
+{
+    Mat4f view;
+    Mat4f projection;
+} CameraV;
+
+typedef struct
+{
+    GLuint shader;  // shader Program
+    GLuint vao;     // how to handle raw data pointers
+    GLuint texture; // add some texture if you want
+    float mvp[16];  // transformation matrix flat(4x4) contains data to transform object into screen space
+
+} DrawingS;
 
 /*func decl */
 GLFWwindow *CreateWindow(int w, int h, const char *wname);
@@ -29,6 +51,99 @@ GLuint LoadTexture(const char *path);
 bool IsShaderCompiled(GLuint shader, const char *sharderName);
 bool IsProgramLinked(GLuint program);
 void SetupVertexAttrib(GLuint index, GLint size, GLenum type, GLsizei stride, const void *pointer);
+
+/* special function for drawing and projection*/
+void ComputeMVP(float out[16], Mat4f model, Mat4f view, Mat4f projection);
+Mat4f LookAt4f(Vec3f eye, Vec3f center, Vec3f up);
+Mat4f Perspective4f(float fov, float aspect, float near, float far);
+Mat4f Ortho4f(float right, float left, float bottom, float top, float near, float far);
+/* func impl for drawing and projection*/
+
+void ComputeMVP(float out[16], Mat4f model, Mat4f view, Mat4f projection)
+{
+
+    // MVP = view*model*projection
+    // MVP as a flat(4x4) matrix
+
+    Mat4f viewXmodel = mat4f_mul(model, view);
+    Mat4f mvp = mat4f_mul(viewXmodel, projection);
+    // Mat4f is 4x4 matrix but we need to flaten as OPENGL dump expect as to
+    // do
+    // OUT[y * 4 + x] = mvp.m[x][y];
+    for (int y = 0; y < 4; y++)
+    {
+        for (int x = 0; x < 4; x++)
+        {
+            out[y * 4 + x] = mvp.m[x][y];
+        }
+    }
+}
+// we define the camera orientation and position
+// out : (4x4) matrix transform world cordinates into camera view space
+Mat4f LookAt4f(Vec3f eye, Vec3f center, Vec3f up)
+{
+    Vec3f ce = vec3f_normalize(vec3f_sub(center, eye));
+    Vec3f fup = vec3f_normalize(vec3f_cross(ce, up));
+    Vec3f v = vec3f_cross(fup, ce);
+
+    // output
+    Mat4f result = mat4f_identity();
+
+    result.m[0][0] = fup.x;
+    result.m[0][1] = fup.y;
+    result.m[0][2] = fup.z;
+
+    result.m[1][0] = v.x;
+    result.m[1][1] = v.y;
+    result.m[1][2] = v.z;
+
+    result.m[2][0] = -ce.x;
+    result.m[2][1] = -ce.y;
+    result.m[2][2] = -ce.z;
+
+    result.m[0][3] = -vec3f_dot(fup, eye);
+    result.m[1][3] = -vec3f_dot(v, eye);
+    result.m[2][3] = vec3f_dot(ce, eye);
+
+    return result;
+}
+
+/* perpective of view objects : simulate human eyes / player
+    fov : field of view angle (rad)
+    aspect : w/h
+    near,far : clipping planes
+*/
+Mat4f Perspective4f(float fov, float aspect, float near, float far)
+{
+
+    Mat4f res = {0};
+    float tanhf = tanf(fov / 2.0f);
+    res.m[0][0] = 1.0f / (aspect * tanhf);
+    res.m[1][1] = 1.0f / (tanhf);
+    res.m[2][2] = -(far + near) / (far - near);
+    res.m[2][3] = -2.0f * far * near / (far - near);
+    res.m[3][2] = -1.0f;
+
+    return res;
+}
+
+/* othographics projection matrix : no perspective
+    especially we will need this for 2D & some UI overlays
+*/
+Mat4f Ortho4f(float right, float left, float bottom, float top, float near, float far)
+{
+    Mat4f res = mat4f_identity();
+
+    res.m[0][0] = 2.0f / (right - left);
+    res.m[1][1] = 2.0f / (top - bottom);
+    res.m[2][2] = -2.0f / (far - near);
+
+    res.m[0][3] = -(right + left) / (right - left);
+    res.m[1][3] = -(top + bottom) / (top - bottom);
+    res.m[2][3] = -(far + near) / (far - near);
+
+    return res;
+}
 
 /*func impl*/
 
