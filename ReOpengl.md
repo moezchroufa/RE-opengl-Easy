@@ -6,7 +6,7 @@ you must copy paste "reOpengl.h" and "stb_img.h"  in your project folder.
 "test.c" is uselful as an example to start with. 
 
 ->MinGW for windows:
-$Flags : -lglew32 -lglfw3 -lopengl32 -lgdi32
+$ Flags : -lglew32 -lglfw3 -lopengl32 -lgdi32
 example using GCC : 
 gcc -o test test.c -lglew32 -lglfw3 -lopengl32 -lgdi32 
 
