@@ -21,6 +21,15 @@ typedef struct
     Mat4f view;
     Mat4f projection;
 } CameraV;
+typedef struct
+{
+
+    GLuint id;
+    int w; // width
+    int h;
+    int pipes; // channels (RGBA)
+    TextureSetting setting;
+} TextureS;
 
 typedef struct
 {
@@ -47,10 +56,13 @@ void SetUniform1f(GLuint program, const char *name, float value);
 void SetUniform3f(GLuint program, const char *name, float x, float y, float z);
 void SetUniform4f(GLuint program, const char *name, float x, float y, float z, float w);
 void SetUniformMat4(GLuint program, const char *name, const float *matrix);
-GLuint LoadTexture(const char *path);
-bool IsShaderCompiled(GLuint shader, const char *sharderName);
+GLuint LoadTexture(const char *path, TextureSetting setting);
+bool IsShaderCompiled(GLuint shader, const char *shaderName);
 bool IsProgramLinked(GLuint program);
 void SetupVertexAttrib(GLuint index, GLint size, GLenum type, GLsizei stride, const void *pointer);
+void SetViewport(int x, int y, int w, int h);                   // glViewport()
+void FrameBufferSizeCallBack(GLFWwindow *window, int w, int h); // setViewort()
+void RegisterFrameBufferSizeCallBack(GLFWwindow *window, void (*callback)(GLFWwindow *, int, int));
 
 /* special function for drawing and projection*/
 void ComputeMVP(float out[16], Mat4f model, Mat4f view, Mat4f projection);
@@ -65,8 +77,8 @@ void ComputeMVP(float out[16], Mat4f model, Mat4f view, Mat4f projection)
     // MVP = view*model*projection
     // MVP as a flat(4x4) matrix
 
-    Mat4f viewXmodel = mat4f_mul(model, view);
-    Mat4f mvp = mat4f_mul(viewXmodel, projection);
+    Mat4f viewXmodel = mat4f_mul(view, model);
+    Mat4f mvp = mat4f_mul(projection, viewXmodel);
     // Mat4f is 4x4 matrix but we need to flaten as OPENGL dump expect as to
     // do
     // OUT[y * 4 + x] = mvp.m[x][y];
@@ -383,7 +395,7 @@ void SetUniformMat4(GLuint program, const char *name, const float *matrix)
         fprintf(stderr, "Uniform %s not found.\n", name);
 }
 
-GLuint LoadTexture(const char *path, int setting)
+GLuint LoadTexture(const char *path, TextureSetting setting)
 {
     int w;
     int h;
@@ -419,7 +431,7 @@ GLuint LoadTexture(const char *path, int setting)
     // todo: change setting to enum type will be better and more precise
     switch (setting)
     {
-    case 1:
+    case TEXTURE_REPEAT:
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
@@ -479,6 +491,26 @@ void SetupVertexAttrib(GLuint index, GLint size, GLenum type, GLsizei stride, co
 {
     glVertexAttribPointer(index, size, type, GL_FALSE, stride, pointer);
     glEnableVertexAttribArray(index);
+}
+
+/* wrapper for glViewport(x,y,w,h)*/
+void SetViewport(int x, int y, int w, int h)
+{
+    glViewport(x, y, w, h);
+}
+/* setViewport(0)*/
+void FrameBufferSizeCallBack(GLFWwindow *window, int w, int h)
+{
+    SetViewport(0, 0, w, h);
+}
+/* glfwSetFramebufferSizeCallback (window , callback)
+    window : window (window context)
+    callback : FrameBufferSizeCallBack(int w , int h);
+
+*/
+void RegisterFrameBufferSizeCallBack(GLFWwindow *window, void (*callback)(GLFWwindow *, int, int))
+{
+    glfwSetFramebufferSizeCallback(window, callback);
 }
 
 #endif
