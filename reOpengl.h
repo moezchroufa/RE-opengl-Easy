@@ -7,6 +7,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#define STB_IMAGE_IMPLEMENTATION
 #include "stb_img.h"
 #include "LAmath.h"
 /* type decl */
@@ -20,7 +21,7 @@ typedef struct
 {
     Mat4f view;
     Mat4f projection;
-} CameraV;
+} CameraS;
 typedef struct
 {
 
@@ -39,6 +40,72 @@ typedef struct
     float mvp[16];  // transformation matrix flat(4x4) contains data to transform object into screen space
 
 } DrawingS;
+
+typedef struct
+{
+    GLuint FBO;
+    GLuint RBO;
+    TextureS texture;
+    int width;
+    int height;
+} FrameBufferS;
+/* rendering to textures !!!*/
+
+FrameBufferS CreateFrameBuffer(int w, int h);
+
+/* implementation */
+
+FrameBufferS CreateFrameBuffer(int w, int h)
+{
+    FrameBufferS fb = {0}; // init or maybe memset() ??
+    fb.width = w;
+    fb.height = h;
+
+    // create a framebuffer 1/ Gen 2/Bind
+    glGenFramebuffers(1, &fb.FBO);
+    glBindFramebuffer(GL_FRAMEBUFFER, fb.FBO);
+
+    fb.texture.w = w;
+    fb.texture.h = h;
+
+    glGenTextures(1, &fb.texture.id);
+    glBindTexture(GL_TEXTURE_2D, fb.texture.id);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, fb.texture.w, fb.texture.h, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, fb.texture.id, 0);
+
+    /* depth and stencil*/
+
+    glGenRenderbuffers(1, &fb.RBO);
+    glBindRenderbuffer(GL_RENDERBUFFER, fb.RBO);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, w, h);
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, fb.RBO);
+    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+    {
+        fprintf(stderr, "ERROR::FRAMEBUFFER:: Framebuffer is not complete!\n");
+    }
+
+    glBindFramebuffer(GL_FRAMEBUFFER, 0); // unbind
+
+    return fb;
+}
+
+void FreeFrameBufferS(FrameBufferS *fb)
+{
+    if (!fb)
+        return; // fb doesn't exist or not allocated
+
+    glDeleteFramebuffers(1, &fb->FBO);
+    glDeleteTextures(1, &fb->texture.id);
+    glDeleteRenderbuffers(1, &fb->RBO);
+    // maybe ill change it to memset instead of this
+    fb->FBO = 0;
+    fb->texture.id = 0;
+    fb->RBO = 0;
+}
 
 /*func decl */
 GLFWwindow *CreateWindow(int w, int h, const char *wname);
