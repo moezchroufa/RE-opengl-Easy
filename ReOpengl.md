@@ -1,20 +1,40 @@
-## "reOpengl" : MAKE OPENGL EASY AND GREAT
-( it's not perfect and missing a lot features but it's fine for me ) 
+# reOpenGL — Lightweight OpenGL Abstraction in C.  <br>
 
-you must copy paste "reOpengl.h" and "stb_img.h"  in your project folder.
-"stb_img.h" : is important to loadTextures(); if you are not gonna use them don't include it!
-"test.c" is uselful as an example to start with. 
+`reOpenGL` is a lightweight OpenGL utility and abstraction layer written in pure C. <br>
+---
+## Features
 
-->MinGW for windows FLAGS:
--lglew32 -lglfw3 -lopengl32 -lgdi32 
-"example using GCC" :
+-  Simple initialization (`GLFW`, `GLEW`)
+-  Framebuffer support (render to texture)
+-  Custom shader loader & hot reloader
+-  Texture loading via `stb_image`
+-  Matrix transformations (Model/View/Projection)
+-  Perspective and orthographic projection helpers
+-  Camera view matrix (LookAt)
+-  Utility wrappers for uniform uploads and vertex buffers
+---
+## Requirements
 
-$ gcc -o test test.c -lglew32 -lglfw3 -lopengl32 -lgdi32 
+- C89/99/11 -compatible compiler/ 
+- OpenGL 3.3+
+- [GLFW](https://www.glfw.org/)
+- [GLEW](http://glew.sourceforge.net/)
+- [stb_image](https://github.com/nothings/stb) (included as `stb_img.h`)
+- `LAmath.h` (Custom or minimal math library for Vec3f, Mat4f, etc.) : author (gWall)
+
+---
+
+important flags when you compile using gcc i.e.  
+
+```bash
+gcc -o test test.c -lglfw -lGL -lGLEW -lm
+```
 
 
-NOTE : as you notice the code is influenced with C89 style
-you will see me doing things like that sometimes DrawingS = {.x= , .y= } , or Vec3f ={ x ,y} , Vec3(x,y)
-it's like a free style c11 c99 c89 .. 
-  
--> feel free to use this or don't !
-Author : moezchroufa (gWall)
+
+
+
+
+
+
+
