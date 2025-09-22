@@ -669,4 +669,146 @@ HOEMEAN Mat4f mat4f_ortho(float left, float right, float bottom, float top, floa
 
     return result;
 }
+
+HOEMEAN Mat4f mat4f_inverse(Mat4f m)
+{
+    Mat4f inv;
+    float det;
+    float *mat = (float *)m.m; // cast 2D array to 1D pointer
+
+    float invOut[16];
+
+    invOut[0] = mat[5] * mat[10] * mat[15] -
+                mat[5] * mat[11] * mat[14] -
+                mat[9] * mat[6] * mat[15] +
+                mat[9] * mat[7] * mat[14] +
+                mat[13] * mat[6] * mat[11] -
+                mat[13] * mat[7] * mat[10];
+
+    invOut[4] = -mat[4] * mat[10] * mat[15] +
+                mat[4] * mat[11] * mat[14] +
+                mat[8] * mat[6] * mat[15] -
+                mat[8] * mat[7] * mat[14] -
+                mat[12] * mat[6] * mat[11] +
+                mat[12] * mat[7] * mat[10];
+
+    invOut[8] = mat[4] * mat[9] * mat[15] -
+                mat[4] * mat[11] * mat[13] -
+                mat[8] * mat[5] * mat[15] +
+                mat[8] * mat[7] * mat[13] +
+                mat[12] * mat[5] * mat[11] -
+                mat[12] * mat[7] * mat[9];
+
+    invOut[12] = -mat[4] * mat[9] * mat[14] +
+                 mat[4] * mat[10] * mat[13] +
+                 mat[8] * mat[5] * mat[14] -
+                 mat[8] * mat[6] * mat[13] -
+                 mat[12] * mat[5] * mat[10] +
+                 mat[12] * mat[6] * mat[9];
+
+    invOut[1] = -mat[1] * mat[10] * mat[15] +
+                mat[1] * mat[11] * mat[14] +
+                mat[9] * mat[2] * mat[15] -
+                mat[9] * mat[3] * mat[14] -
+                mat[13] * mat[2] * mat[11] +
+                mat[13] * mat[3] * mat[10];
+
+    invOut[5] = mat[0] * mat[10] * mat[15] -
+                mat[0] * mat[11] * mat[14] -
+                mat[8] * mat[2] * mat[15] +
+                mat[8] * mat[3] * mat[14] +
+                mat[12] * mat[2] * mat[11] -
+                mat[12] * mat[3] * mat[10];
+
+    invOut[9] = -mat[0] * mat[9] * mat[15] +
+                mat[0] * mat[11] * mat[13] +
+                mat[8] * mat[1] * mat[15] -
+                mat[8] * mat[3] * mat[13] -
+                mat[12] * mat[1] * mat[11] +
+                mat[12] * mat[3] * mat[9];
+
+    invOut[13] = mat[0] * mat[9] * mat[14] -
+                 mat[0] * mat[10] * mat[13] -
+                 mat[8] * mat[1] * mat[14] +
+                 mat[8] * mat[2] * mat[13] +
+                 mat[12] * mat[1] * mat[10] -
+                 mat[12] * mat[2] * mat[9];
+
+    invOut[2] = mat[1] * mat[6] * mat[15] -
+                mat[1] * mat[7] * mat[14] -
+                mat[5] * mat[2] * mat[15] +
+                mat[5] * mat[3] * mat[14] +
+                mat[13] * mat[2] * mat[7] -
+                mat[13] * mat[3] * mat[6];
+
+    invOut[6] = -mat[0] * mat[6] * mat[15] +
+                mat[0] * mat[7] * mat[14] +
+                mat[4] * mat[2] * mat[15] -
+                mat[4] * mat[3] * mat[14] -
+                mat[12] * mat[2] * mat[7] +
+                mat[12] * mat[3] * mat[6];
+
+    invOut[10] = mat[0] * mat[5] * mat[15] -
+                 mat[0] * mat[7] * mat[13] -
+                 mat[4] * mat[1] * mat[15] +
+                 mat[4] * mat[3] * mat[13] +
+                 mat[12] * mat[1] * mat[7] -
+                 mat[12] * mat[3] * mat[5];
+
+    invOut[14] = -mat[0] * mat[5] * mat[14] +
+                 mat[0] * mat[6] * mat[13] +
+                 mat[4] * mat[1] * mat[14] -
+                 mat[4] * mat[2] * mat[13] -
+                 mat[12] * mat[1] * mat[6] +
+                 mat[12] * mat[2] * mat[5];
+
+    invOut[3] = -mat[1] * mat[6] * mat[11] +
+                mat[1] * mat[7] * mat[10] +
+                mat[5] * mat[2] * mat[11] -
+                mat[5] * mat[3] * mat[10] -
+                mat[9] * mat[2] * mat[7] +
+                mat[9] * mat[3] * mat[6];
+
+    invOut[7] = mat[0] * mat[6] * mat[11] -
+                mat[0] * mat[7] * mat[10] -
+                mat[4] * mat[2] * mat[11] +
+                mat[4] * mat[3] * mat[10] +
+                mat[8] * mat[2] * mat[7] -
+                mat[8] * mat[3] * mat[6];
+
+    invOut[11] = -mat[0] * mat[5] * mat[11] +
+                 mat[0] * mat[7] * mat[9] +
+                 mat[4] * mat[1] * mat[11] -
+                 mat[4] * mat[3] * mat[9] -
+                 mat[8] * mat[1] * mat[7] +
+                 mat[8] * mat[3] * mat[5];
+
+    invOut[15] = mat[0] * mat[5] * mat[10] -
+                 mat[0] * mat[6] * mat[9] -
+                 mat[4] * mat[1] * mat[10] +
+                 mat[4] * mat[2] * mat[9] +
+                 mat[8] * mat[1] * mat[6] -
+                 mat[8] * mat[2] * mat[5];
+
+    det = mat[0] * invOut[0] + mat[1] * invOut[4] + mat[2] * invOut[8] + mat[3] * invOut[12];
+
+    if (det == 0)
+    {
+        // Return identity if not invertible
+        Mat4f identity = {{{1, 0, 0, 0},
+                           {0, 1, 0, 0},
+                           {0, 0, 1, 0},
+                           {0, 0, 0, 1}}};
+        return identity;
+    }
+
+    det = 1.0f / det;
+
+    for (int i = 0; i < 16; i++)
+    {
+        inv.m[i / 4][i % 4] = invOut[i] * det;
+    }
+
+    return inv;
+}
 #endif

@@ -7,7 +7,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
-#define STB_IMAGE_IMPLEMENTATION
 #include "stb_img.h"
 #include "LAmath.h"
 /* type decl */
