@@ -27,7 +27,7 @@
 important flags when you compile using gcc i.e.  
 
 ```bash
-gcc -o test test.c -lglfw -lGL -lGLEW -lm
+gcc -o test test.c decl_file.c -lglfw -lGL -lGLEW -lm
 ```
 
 
