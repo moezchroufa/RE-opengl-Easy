@@ -7,6 +7,7 @@
 
 #include <stdlib.h>
 #include <math.h>
+#include <string.h> // for memcpy
 #define HOEMEAN static inline
 typedef struct
 {
@@ -674,7 +675,9 @@ HOEMEAN Mat4f mat4f_inverse(Mat4f m)
 {
     Mat4f inv;
     float det;
-    float *mat = (float *)m.m; // cast 2D array to 1D pointer
+
+    float mat[16];
+    memcpy(mat, m.m, sizeof(mat)); // Safe flattening
 
     float invOut[16];
 
@@ -794,12 +797,8 @@ HOEMEAN Mat4f mat4f_inverse(Mat4f m)
 
     if (det == 0)
     {
-        // Return identity if not invertible
-        Mat4f identity = {{{1, 0, 0, 0},
-                           {0, 1, 0, 0},
-                           {0, 0, 1, 0},
-                           {0, 0, 0, 1}}};
-        return identity;
+        // if det == 0 --> return identity matric ( this could casue problems)
+        return mat4f_identity();
     }
 
     det = 1.0f / det;
