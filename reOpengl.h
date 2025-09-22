@@ -21,6 +21,19 @@ typedef struct
     Mat4f view;
     Mat4f projection;
 } CameraS;
+
+typedef struct
+{
+    CameraS cam;
+    Vec3f position;
+    Vec3f front;
+    Vec3f up;
+    float speed;
+    float sensitivity;
+    float rayax; // rotation around y axis
+    float raxax; // rotation around x axis
+} CameraControllerS;
+
 typedef struct
 {
 
@@ -30,6 +43,13 @@ typedef struct
     int pipes; // channels (RGBA)
     TextureSetting setting;
 } TextureS;
+
+typedef struct
+{
+    GLuint vao;
+    GLuint vbo;
+    GLuint vertexCount;
+} MeshS;
 
 typedef struct
 {
@@ -49,8 +69,12 @@ typedef struct
     int height;
 } FrameBufferS;
 /* rendering to textures !!!*/
-
+// creation of the framebuffer
 FrameBufferS CreateFrameBuffer(int w, int h);
+// destroying the framebuffer
+void FreeFrameBufferS(FrameBufferS *fb);
+// resizing the framebuffer by updating its w,h
+void ResizeFrameBufferS(FrameBufferS *fbs, int n_w, int n_h);
 
 /* implementation */
 
@@ -105,6 +129,12 @@ void FreeFrameBufferS(FrameBufferS *fb)
     fb->texture.id = 0;
     fb->RBO = 0;
 }
+void ResizeFrameBufferS(FrameBufferS *fbs, int n_w, int n_h)
+{
+    FreeFrameBufferS(fbs);                // free that last version
+    (*fbs) = CreateFrameBuffer(n_w, n_h); // create a new one
+    return;
+}
 
 /*func decl */
 GLFWwindow *CreateWindow(int w, int h, const char *wname);
@@ -112,7 +142,7 @@ GLFWwindow *CreateWindowContext(int w, int h, const char *wname);
 void InitGLFW();
 void FreeWindow(GLFWwindow *window);
 GLuint CreateShader(const char *vertexSource, const char *fragmentSource);
-char *ReadFile(const char *path);
+char *Read_File(const char *path);
 GLuint CreateShaderFiles(const char *vertexPath, const char *fragmentPath);
 GLuint ReloadShader(GLuint *shader, const char *vertexPath, const char *fragPath);
 GLuint CreateVertexArrayObject();
@@ -122,13 +152,63 @@ void SetUniform1f(GLuint program, const char *name, float value);
 void SetUniform3f(GLuint program, const char *name, float x, float y, float z);
 void SetUniform4f(GLuint program, const char *name, float x, float y, float z, float w);
 void SetUniformMat4(GLuint program, const char *name, const float *matrix);
-GLuint LoadTexture(const char *path, TextureSetting setting);
+TextureS LoadTexture(const char *path, TextureSetting setting);
 bool IsShaderCompiled(GLuint shader, const char *shaderName);
 bool IsProgramLinked(GLuint program);
 void SetupVertexAttrib(GLuint index, GLint size, GLenum type, GLsizei stride, const void *pointer);
 void SetViewport(int x, int y, int w, int h);                   // glViewport()
 void FrameBufferSizeCallBack(GLFWwindow *window, int w, int h); // setViewort()
 void RegisterFrameBufferSizeCallBack(GLFWwindow *window, void (*callback)(GLFWwindow *, int, int));
+void EnableDepthTest();
+bool IsKeyPressed(GLFWwindow *window, int key);
+void CleanScreen(float r, float g, float b, float alpha);
+void FreeTextureS(TextureS *tex);
+void BindTextureS(TextureS *tex);
+void UnbindTextureS(TextureS *tex);
+/* those kinda help for debugging */
+void AboutRenderer();
+void ErrorCallback(int error, const char *description);
+/* impl : about renderer and error callback*/
+void AboutRenderer()
+{
+    const GLubyte *renderer = glGetString(GL_RENDERER);
+    const GLubyte *version = glGetString(GL_VERSION);
+    printf("Renderer: %s\n", renderer);
+    printf("OpenGL version: %s\n", version);
+    return;
+}
+
+void ErrorCallback(int error, const char *description)
+{
+    fprintf(stderr, "GLFW Error [%d]: %s\n", error, description);
+}
+
+void EnableDepthTest()
+{
+    glEnable(GL_DEPTH_TEST);
+    glDepthFunc(GL_LESS);
+    printf("Depth test enabled (GL_LESS)\n");
+}
+/* binding the mesh */
+void BindMeshS(MeshS *mesh);
+// implementation
+void BindMeshS(MeshS *mesh)
+{
+    glBindVertexArray(mesh->vao);
+    return;
+}
+// clear screen impl
+void CleanScreen(float r, float g, float b, float alpha)
+{
+    glClearColor(r, g, b, alpha);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+}
+
+/* special for keys and input*/
+bool IsKeyPressed(GLFWwindow *window, int key)
+{
+    return glfwGetKey(window, key) == GLFW_PRESS;
+}
 
 /* special function for drawing and projection*/
 void ComputeMVP(float out[16], Mat4f model, Mat4f view, Mat4f projection);
@@ -331,7 +411,7 @@ GLuint CreateShader(const char *vertexSource, const char *fragmentSource)
 
 // reading files
 
-char *ReadFile(const char *path)
+char *Read_File(const char *path)
 {
     FILE *file = fopen(path, "rb");
 
@@ -364,14 +444,14 @@ char *ReadFile(const char *path)
 /* read the GLSL source code via a file path*/
 GLuint CreateShaderFiles(const char *vertexPath, const char *fragmentPath)
 {
-    char *vertexSource = ReadFile(vertexPath);
+    char *vertexSource = Read_File(vertexPath);
     if (!vertexSource)
     {
         fprintf(stderr, "Vertex shader file read error.\n");
         return 0;
     }
 
-    char *fragmentSource = ReadFile(fragmentPath);
+    char *fragmentSource = Read_File(fragmentPath);
     if (!fragmentSource)
     {
         fprintf(stderr, "Fragment shader file read error.\n");
@@ -463,18 +543,17 @@ void SetUniformMat4(GLuint program, const char *name, const float *matrix)
 
 GLuint LoadTexture(const char *path, TextureSetting setting)
 {
-    int w;
-    int h;
-    int pipes; // R,G,B or R,G,B,ALPHA
+    TextureS tex = {0};
+    tex.setting = setting;
 
-    unsigned char *data = stbi_load(path, &w, &h, &pipes, 0);
+    unsigned char *data = stbi_load(path, &tex.w, &tex.h, &tex.pipes, 0);
     if (!data)
     {
         fprintf(stderr, "Failed to load texture : %s \n", path);
         return 0;
     }
     GLenum format;
-    switch (pipes)
+    switch (tex.pipes)
     {
     case 1:
         format = GL_RED;
@@ -486,14 +565,13 @@ GLuint LoadTexture(const char *path, TextureSetting setting)
         format = GL_RGBA;
         break;
     default:
-        fprintf(stderr, "unsupported number of pipes : %d", pipes);
+        fprintf(stderr, "unsupported number of pipes : %d", tex.pipes);
         stbi_image_free(data);
-        return 0;
+        return tex;
     }
 
-    GLuint texture;
-    glGenTextures(1, &texture);
-    glBindTexture(GL_TEXTURE_2D, texture);
+    glGenTextures(1, &tex.id);
+    glBindTexture(GL_TEXTURE_2D, tex.id);
     // todo: change setting to enum type will be better and more precise
     switch (setting)
     {
@@ -510,11 +588,37 @@ GLuint LoadTexture(const char *path, TextureSetting setting)
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     };
 
-    glTexImage2D(GL_TEXTURE_2D, 0, format, w, h, 0, format, GL_UNSIGNED_BYTE, data);
+    glTexImage2D(GL_TEXTURE_2D, 0, format, tex.w, tex.h, 0, format, GL_UNSIGNED_BYTE, data);
     glGenerateMipmap(GL_TEXTURE_2D);
 
     stbi_image_free(data);
-    return texture;
+    return tex;
+}
+
+void FreeTextureS(TextureS *tex)
+{
+    if (!tex || tex->id == 0)
+    {
+        printf("FAILED : tex is NULL .. or op failed \n");
+        return;
+    }
+    glDeleteTextures(1, &tex->id);
+    tex->id = 0;
+    tex->w = 0;
+    tex->h = 0;
+    tex->pipes = 0;
+    tex->setting = TEXTURE_CLAMP;
+}
+
+void BindTextureS(TextureS *tex)
+{
+    glBindTexture(GL_TEXTURE_2D, tex->id);
+}
+
+void UnbindTexture()
+{
+    // unbinding by setting the id to 0
+    glBindTexture(GL_TEXTURE_2D, 0);
 }
 
 bool IsShaderCompiled(GLuint shader, const char *shaderName)

@@ -9,6 +9,10 @@
 #include <math.h>
 #include <string.h> // for memcpy
 #define HOEMEAN static inline
+
+#define LAMATH_PI 3.14159265358979323846
+
+/* types vectors*/
 typedef struct
 {
     int x;
@@ -45,6 +49,49 @@ typedef struct
 {
     float x, y, z, w;
 } Vec4f;
+
+/* types matrices */
+
+typedef struct
+{
+    float m[2][2];
+} Mat2f;
+
+typedef struct
+{
+    float m[3][3];
+} Mat3f;
+
+typedef struct
+{
+    float m[4][4];
+} Mat4f;
+
+/* converstion (deg-> rad ; rad->deg)*/
+
+HOEMEAN float ToRadians(float deg)
+{
+    return deg * (LAMATH_PI / 180.0f);
+}
+
+HOEMEAN float ToDegrees(float rad)
+{
+    return rad * (180.0f / LAMATH_PI);
+}
+
+/* linear interpolation between  x , y by t : people call it lerp */
+
+HOEMEAN float Lerp(float x, float y, float t)
+{
+    return x + t * (y - x);
+}
+
+/* convert angle (deg) to Vector (2f)*/
+HOEMEAN Vec2f DegToVec(float deg)
+{
+    float rad = ToRadians(deg);
+    return Vec2f{cosf(rad), sinf(rad)};
+}
 
 HOEMEAN Vec2i vec2i(int x, int y)
 {
@@ -342,21 +389,6 @@ HOEMEAN Vec4f vec4f_normalize(Vec4f v)
 }
 
 // Matrix operations
-
-typedef struct
-{
-    float m[2][2];
-} Mat2f;
-
-typedef struct
-{
-    float m[3][3];
-} Mat3f;
-
-typedef struct
-{
-    float m[4][4];
-} Mat4f;
 
 HOEMEAN Mat2f mat2f(float m00, float m01, float m10, float m11)
 {
@@ -810,4 +842,16 @@ HOEMEAN Mat4f mat4f_inverse(Mat4f m)
 
     return inv;
 }
+
+/* distance between 2 vectors*/
+
+HOEMEAN float DISTANCE2VF(Vec2f V1, Vec2f V2)
+{
+
+    float dx = V2.x - V1.x;
+    float dy = V2.y - V1.y;
+
+    return sqrtf(dx * dx + dy * dy);
+}
+
 #endif
