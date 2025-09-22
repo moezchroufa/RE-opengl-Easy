@@ -13,7 +13,7 @@ const char *fragmentShaderSource = "#version 330 core\n"
                                    "out vec4 FragColor;\n"
                                    "void main()\n"
                                    "{\n"
-                                   "   FragColor = vec4(1.0, 0.5, 0.2, 1.0);\n"
+                                   "   FragColor = vec4(2.5, 0.5, 1.2, 1.0);\n"
                                    "}\0";
 
 int main()
