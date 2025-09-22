@@ -181,7 +181,7 @@ Mat4f LookAt4f(Vec3f eye, Vec3f center, Vec3f up)
 
     result.m[0][3] = -vec3f_dot(fup, eye);
     result.m[1][3] = -vec3f_dot(v, eye);
-    result.m[2][3] = vec3f_dot(ce, eye);
+    result.m[2][3] = -vec3f_dot(ce, eye);
 
     return result;
 }
