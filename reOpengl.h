@@ -30,8 +30,12 @@ typedef struct
     Vec3f up;
     float speed;
     float sensitivity;
-    float rayax; // rotation around y axis
-    float raxax; // rotation around x axis
+    float yaw;   // rotation around y axis
+    float pitch; // rotation around x axis
+
+    float lastx;
+    float lasty;
+    int firstMouse;
 } CameraControllerS;
 
 typedef struct
@@ -167,6 +171,8 @@ void FreeTextureS(TextureS *tex);
 void BindTextureS(TextureS *tex);
 void UnbindTextureS();
 void DrawMeshS(MeshS *mesh);
+void UpdateCameraFront(CameraControllerS *camera);
+void MouseCallback(GLFWwindow *window, double xpos, double ypos);
 /* those kinda help for debugging */
 void AboutRenderer();
 void ErrorCallback(int error, const char *description);
@@ -711,6 +717,51 @@ void DrawMeshS(MeshS *mesh)
     // another option : GL_TRIANGLE_STRIP
     glBindVertexArray(mesh->vao);
     glDrawArrays(GL_TRIANGLES, 0, mesh->vertexCount);
+}
+
+/* updating the camera*/
+void UpdateCameraFront(CameraControllerS *camera)
+{
+    Vec3f front;
+    float radYaw = camera->yaw * (LAMATH_PI * 180.0f);
+    float radPitch = camera->pitch * (LAMATH_PI / 180.0f);
+
+    front.x = cosf(radYaw) * cosf(radPitch);
+    front.y = sinf(radPitch);
+    front.z = sinf(radYaw) * cosf(radPitch);
+    camera->front = vec3f_normalize(front);
+}
+
+void MouseCallback(GLFWwindow *window, double xpos, double ypos)
+{
+    CameraControllerS camera;
+
+    if (camera.firstMouse)
+    {
+        camera.lastx = xpos;
+        camera.lasty = ypos;
+        camera.firstMouse = 0;
+    }
+
+    float xoffset = xpos - camera.lastX;
+    float yoffset = camera.lastY - ypos; // reversed y
+
+    camera.lastX = xpos;
+    camera.lastY = ypos;
+
+    xoffset *= camera.sensitivity;
+    yoffset *= camera.sensitivity;
+
+    camera.yaw += xoffset;
+    camera.pitch += yoffset;
+
+    // Clamp pitch
+    if (camera.pitch > 89.0f)
+        camera.pitch = 89.0f;
+    if (camera.pitch < -89.0f)
+        camera.pitch = -89.0f;
+
+    UpdateCameraFront(&camera);
 }
 
 #endif
