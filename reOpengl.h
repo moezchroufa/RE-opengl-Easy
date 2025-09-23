@@ -743,11 +743,11 @@ void MouseCallback(GLFWwindow *window, double xpos, double ypos)
         camera.firstMouse = 0;
     }
 
-    float xoffset = xpos - camera.lastX;
-    float yoffset = camera.lastY - ypos; // reversed y
+    float xoffset = xpos - camera.lastx;
+    float yoffset = camera.lasty - ypos; // reversed y
 
-    camera.lastX = xpos;
-    camera.lastY = ypos;
+    camera.lastx = xpos;
+    camera.lasty = ypos;
 
     xoffset *= camera.sensitivity;
     yoffset *= camera.sensitivity;
