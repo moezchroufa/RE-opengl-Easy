@@ -90,7 +90,7 @@ HOEMEAN float Lerp(float x, float y, float t)
 HOEMEAN Vec2f DegToVec(float deg)
 {
     float rad = ToRadians(deg);
-    return Vec2f{cosf(rad), sinf(rad)};
+    return (Vec2f){cosf(rad), sinf(rad)};
 }
 
 HOEMEAN Vec2i vec2i(int x, int y)

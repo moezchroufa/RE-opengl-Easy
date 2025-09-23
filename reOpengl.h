@@ -541,7 +541,7 @@ void SetUniformMat4(GLuint program, const char *name, const float *matrix)
         fprintf(stderr, "Uniform %s not found.\n", name);
 }
 
-GLuint LoadTexture(const char *path, TextureSetting setting)
+TextureS LoadTexture(const char *path, TextureSetting setting)
 {
     TextureS tex = {0};
     tex.setting = setting;
