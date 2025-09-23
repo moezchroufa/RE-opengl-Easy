@@ -165,7 +165,7 @@ bool IsKeyPressed(GLFWwindow *window, int key);
 void CleanScreen(float r, float g, float b, float alpha);
 void FreeTextureS(TextureS *tex);
 void BindTextureS(TextureS *tex);
-void UnbindTextureS(TextureS *tex);
+void UnbindTextureS();
 void DrawMeshS(MeshS *mesh);
 /* those kinda help for debugging */
 void AboutRenderer();
