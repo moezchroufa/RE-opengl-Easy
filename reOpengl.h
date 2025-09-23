@@ -550,7 +550,8 @@ TextureS LoadTexture(const char *path, TextureSetting setting)
     if (!data)
     {
         fprintf(stderr, "Failed to load texture : %s \n", path);
-        return 0;
+        TextureS S = {0};
+        return S; // return a null object
     }
     GLenum format;
     switch (tex.pipes)
