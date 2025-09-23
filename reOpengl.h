@@ -93,7 +93,7 @@ FrameBufferS CreateFrameBuffer(int w, int h)
 
     glGenTextures(1, &fb.texture.id);
     glBindTexture(GL_TEXTURE_2D, fb.texture.id);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, fb.texture.w, fb.texture.h, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16, fb.texture.w, fb.texture.h, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
 
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -160,11 +160,13 @@ void SetViewport(int x, int y, int w, int h);                   // glViewport()
 void FrameBufferSizeCallBack(GLFWwindow *window, int w, int h); // setViewort()
 void RegisterFrameBufferSizeCallBack(GLFWwindow *window, void (*callback)(GLFWwindow *, int, int));
 void EnableDepthTest();
+void DisableDepthTest();
 bool IsKeyPressed(GLFWwindow *window, int key);
 void CleanScreen(float r, float g, float b, float alpha);
 void FreeTextureS(TextureS *tex);
 void BindTextureS(TextureS *tex);
 void UnbindTextureS(TextureS *tex);
+void DrawMeshS(MeshS *mesh);
 /* those kinda help for debugging */
 void AboutRenderer();
 void ErrorCallback(int error, const char *description);
@@ -189,6 +191,13 @@ void EnableDepthTest()
     glDepthFunc(GL_LESS);
     printf("Depth test enabled (GL_LESS)\n");
 }
+
+void DisableDepthTest()
+{
+    glDisable(GL_DEPTH_TEST);
+    printf("Depth test disabled \n");
+}
+
 /* binding the mesh */
 void BindMeshS(MeshS *mesh);
 // implementation
@@ -223,7 +232,7 @@ void ComputeMVP(float out[16], Mat4f model, Mat4f view, Mat4f projection)
     // MVP = view*model*projection
     // MVP as a flat(4x4) matrix
 
-    Mat4f viewXmodel = mat4f_mul(view, model);
+    Mat4f viewXmodel = mat4f_mul(model, view);
     Mat4f mvp = mat4f_mul(projection, viewXmodel);
     // Mat4f is 4x4 matrix but we need to flaten as OPENGL dump expect as to
     // do
@@ -277,7 +286,7 @@ Mat4f Perspective4f(float fov, float aspect, float near, float far)
     Mat4f res = {0};
     float tanhf = tanf(fov / 2.0f);
     res.m[0][0] = 1.0f / (aspect * tanhf);
-    res.m[1][1] = 1.0f / (tanhf);
+    res.m[1][1] = 1.0f / tanhf;
     res.m[2][2] = -(far + near) / (far - near);
     res.m[2][3] = -2.0f * far * near / (far - near);
     res.m[3][2] = -1.0f;
@@ -311,6 +320,15 @@ GLFWwindow *CreateWindow(int w, int h, const char *wname)
     if (!window)
     {
         fprintf(stderr, "failed to create a window ...\n");
+        glfwTerminate();
+        return NULL;
+    }
+    glewExperimental = GL_TRUE;
+    GLenum err = glewInit();
+    if (err != GLEW_OK)
+    {
+        fprintf(stderr, "Failed to initialize GLEW: %s\n", glewGetErrorString(err));
+        glfwDestroyWindow(window);
         glfwTerminate();
         return NULL;
     }
@@ -598,9 +616,13 @@ TextureS LoadTexture(const char *path, TextureSetting setting)
 
 void FreeTextureS(TextureS *tex)
 {
-    if (!tex || tex->id == 0)
+    if (!tex)
     {
-        printf("FAILED : tex is NULL .. or op failed \n");
+        return;
+    }
+    if (tex->id == 0)
+    {
+        fprintf(stderr, "already empty ....\n");
         return;
     }
     glDeleteTextures(1, &tex->id);
@@ -616,7 +638,7 @@ void BindTextureS(TextureS *tex)
     glBindTexture(GL_TEXTURE_2D, tex->id);
 }
 
-void UnbindTexture()
+void UnbindTextureS()
 {
     // unbinding by setting the id to 0
     glBindTexture(GL_TEXTURE_2D, 0);
@@ -682,6 +704,13 @@ void FrameBufferSizeCallBack(GLFWwindow *window, int w, int h)
 void RegisterFrameBufferSizeCallBack(GLFWwindow *window, void (*callback)(GLFWwindow *, int, int))
 {
     glfwSetFramebufferSizeCallback(window, callback);
+}
+/* drawing the mesh finally*/
+void DrawMeshS(MeshS *mesh)
+{
+    // another option : GL_TRIANGLE_STRIP
+    glBindVertexArray(mesh->vao);
+    glDrawArrays(GL_TRIANGLES, 0, mesh->vertexCount);
 }
 
 #endif
