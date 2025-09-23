@@ -388,6 +388,21 @@ HOEMEAN Vec4f vec4f_normalize(Vec4f v)
     return result;
 }
 
+HOEMEAN Vec4f vec3f_to_vec4f(Vec3f v, float w)
+{
+    return (Vec4f){v.x, v.y, v.z, w};
+}
+
+HOEMEAN Vec3f vec4f_to_vec3f(Vec4f v)
+{
+    if (v.w == 0.0f)
+    {
+        return (Vec3f){v.x, v.y, v.z};
+    }
+
+    return (Vec3f){v.x / v.w, v.y / v.w, v.z / v.w};
+}
+
 // Matrix operations
 
 HOEMEAN Mat2f mat2f(float m00, float m01, float m10, float m11)
@@ -830,6 +845,7 @@ HOEMEAN Mat4f mat4f_inverse(Mat4f m)
     if (det == 0)
     {
         // if det == 0 --> return identity matric ( this could casue problems)
+        printf("[mat4f_inverse] Warning: Matrix not invertible. Returning identity.\n");
         return mat4f_identity();
     }
 
@@ -852,6 +868,72 @@ HOEMEAN float DISTANCE2VF(Vec2f V1, Vec2f V2)
     float dy = V2.y - V1.y;
 
     return sqrtf(dx * dx + dy * dy);
+}
+
+HOEMEAN Vec3f ProjectionVertex(Mat4f projection, Vec4f vertex)
+{
+    Vec4f v = mat4f_mul_vec4f(projection, vertex);
+    Vec3f result;
+
+    if (v.w != 0.0f)
+    {
+        result.x = v.x / v.w;
+        result.y = v.y / v.w;
+        result.z = v.z / v.w;
+    }
+    else
+    {
+        result.x = 0.0f;
+        result.y = 0.0f;
+        result.z = 0.0f;
+    }
+
+    return result;
+}
+
+/* reOpengl.h contain another lookAt impelmentation*/
+HOEMEAN Mat4f Mat4fLookAt(Vec3f eye, Vec3f target, Vec3f up)
+{
+    Vec3f f = vec3f_normalize(vec3f_sub(target, eye));
+    Vec3f r = vec3f_normalize(vec3f_cross(f, up));
+    Vec3f u = vec3f_cross(r, f);
+
+    Mat4f result = mat4f_identity();
+
+    result.m[0][0] = r.x;
+    result.m[0][1] = r.y;
+    result.m[0][2] = r.z;
+
+    result.m[1][0] = u.x;
+    result.m[1][1] = u.y;
+    result.m[1][2] = u.z;
+
+    result.m[2][0] = -f.x;
+    result.m[2][1] = -f.y;
+    result.m[2][2] = -f.z;
+
+    result.m[0][3] = -vec3f_dot(r, eye);
+    result.m[1][3] = -vec3f_dot(u, eye);
+    result.m[2][3] = vec3f_dot(f, eye);
+
+    return result;
+}
+
+HOEMEAN Mat3f mat3f_translate_2d(Vec2f t)
+{
+    return mat3f(1, 0, t.x, 0, 1, t.y, 0, 0, 1);
+}
+
+HOEMEAN Mat3f mat3f_scale_2d(Vec2f s)
+{
+    return mat3f(s.x, 0, 0, 0, s.y, 0, 0, 0, 1);
+}
+
+HOEMEAN Mat3f mat3f_rotate_2d(float angle)
+{
+    float c = cosf(angle);
+    float s = sinf(angle);
+    return mat3f(c, -s, 0, s, c, 0, 0, 0, 1);
 }
 
 #endif
