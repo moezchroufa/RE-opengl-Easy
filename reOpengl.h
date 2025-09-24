@@ -72,6 +72,25 @@ typedef struct
     int width;
     int height;
 } FrameBufferS;
+
+typedef enum
+{
+    UI_BUTTON,
+    UI_IMAGE,
+    UI_LABEL,
+    UI_MOUSE,
+    UI_BOX
+} UItypeS;
+
+typedef struct
+{
+    TextureS texture;
+    Vec2f pos;
+    Vec2f size;
+    UItypeS type;
+    bool isVisible;
+} UIelementS;
+
 /* rendering to textures !!!*/
 // creation of the framebuffer
 FrameBufferS CreateFrameBuffer(int w, int h);
