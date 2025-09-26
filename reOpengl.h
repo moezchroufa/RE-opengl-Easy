@@ -141,7 +141,7 @@ void CleanScreen(float r, float g, float b, float alpha);
 void FreeTextureS(TextureS *tex);
 void BindTextureS(TextureS *tex);
 void UnbindTextureS();
-void BindMeshS(MeshS *mesh,GLuint shaderProgram);
+void BindMeshS(MeshS *mesh, GLuint shaderProgram);
 void DrawMeshS(MeshS *mesh);
 void DeleteMeshS(MeshS *mesh);
 void AboutRenderer();
@@ -160,6 +160,10 @@ void UnbindFrameBuffer(int windowWidth, int windowHeight);
 void DrawFrameBufferTexture(FrameBufferS *fb, GLuint shaderProgram, GLuint quadVAO);
 void UpdateCameraProjection(CCameraS *cam, float fovDeg, float aspect, float nearZ, float farZ);
 void UpdateCameraOrtho(CCameraS *cam, float left, float right, float bottom, float top, float nearZ, float farZ);
+/* framebuffersizecallback for updating the view port when resizing the window*/
+void FramebufferSizeCallback(GLFWwindow *window, int width, int height);
+/* framebuffersizecallback update the view port and the camera projection */
+void SizeCallbackViewCam(GLFWwindow *window, int width, int height);
 
 /* ----> all those function are deprecated <----------
 void ComputeMVP(float out[16], mat4 model, mat4 view, mat4 projection);
@@ -411,13 +415,23 @@ GLuint CreateVertexBufferObject(const void *data, size_t size)
     glBufferData(GL_ARRAY_BUFFER, size, data, GL_STATIC_DRAW);
     return vbo;
 }
-
+/*
+    index : attribute location : i.e layout(location=0).
+    size : number of components : i.e (3 for vec3).
+    type : Data type ( most common case : GL_FLOAT)
+    stride : size of each vertex in bytex ( sizeof(data) -> return nb bytes)
+    pointer: offset within the vertex struct ( raw data)
+*/
 void SetupVertexAttrib(GLuint index, GLint size, GLenum type, GLsizei stride, const void *pointer)
 {
     glVertexAttribPointer(index, size, type, GL_FALSE, stride, pointer);
     glEnableVertexAttribArray(index);
 }
 
+/*
+    ill consider removing : glUseProgram() inside the functions of SetUniform.
+    but i still think it's safe and not cause any error for the momment.
+*/
 void SetUniform1i(GLuint program, const char *name, int value)
 {
     GLint location = glGetUniformLocation(program, name);
@@ -533,6 +547,26 @@ TextureS LoadTexture(const char *path, TextureSettingS setting)
     return tex;
 }
 
+/* make sure to call this :  glfwSetFramebufferSizeCallback(window, FramebufferSizeCallback);  */
+void FramebufferSizeCallback(GLFWwindow *window, int width, int height)
+{
+    glViewport(0, 0, width, height);
+}
+/* this updates the view port also update the camera projection
+and call this : glfwSetFramebufferSizeCallback(window, SizeCallbackViewCam);
+*/
+void SizeCallbackViewCam(GLFWwindow *window, int width, int height)
+{
+    glViewport(0, 0, width, height);
+
+    // Update the camera projection matrix aspect ratio
+    CCameraS *cam = (CCameraS *)glfwGetWindowUserPointer(window);
+    if (cam)
+    {
+        UpdateCameraProjection(cam, 45.0f, (float)width / (float)height, 0.1f, 100.0f);
+    }
+}
+
 void FreeTextureS(TextureS *tex)
 {
     if (tex && tex->id != 0)
@@ -592,7 +626,7 @@ void BindMeshS(MeshS *mesh, GLuint shaderProgram)
     GLint mvpLocation = glGetUniformLocation(shaderProgram, "u_MVP");
     if (mvpLocation != -1)
     {
-        glUniformMatrix4fv(mvpLocation, 1, GL_FALSE, mesh->mvp);
+        glUniformMatrix4fv(mvpLocation, 1, GL_FALSE, (const GLfloat *)mesh->mvp);
     }
     else
     {
