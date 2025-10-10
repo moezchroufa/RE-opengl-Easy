@@ -1,4 +1,4 @@
-#include "reOpengl.h"
+#include "reopengl.h"
 
 /* function impelementation*/
 
